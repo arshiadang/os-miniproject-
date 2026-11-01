@@ -1,0 +1,7 @@
+SOMAIYASAT MISSION REPORT (synthetic data)
+Total decisions: 10
+TX_TTC       0
+TX_SSTV      0
+TX_VOICE     0
+SAFE_BEACON  10
+IDLE         0

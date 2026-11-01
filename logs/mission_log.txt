@@ -1,0 +1,70 @@
+[mission pid=3915] ===== ground pass started =====
+[mission pid=3915] created child 3916 for telemetry acquisition
+[mission pid=3915] child 3916 (telemetry acquisition) finished, exit status = 0
+[mission pid=3915] created child 3917 for AI router
+[mission pid=3915] child 3917 (AI router) finished, exit status = 0
+[mission pid=3915] created child 3919 for report
+[mission pid=3915] child 3919 (report) finished, exit status = 0
+[mission pid=3915] ===== ground pass finished =====
+[mission pid=24760] ===== ground pass started =====
+[mission pid=24760] created child 24761 for telemetry acquisition
+[mission pid=24760] child 24761 (telemetry acquisition) finished, exit status = 1
+[mission pid=24760] created child 24768 for AI router
+[mission pid=24760] child 24768 (AI router) finished, exit status = 2
+[mission pid=24760] AI router could not read telemetry -> entering SAFE MODE
+[mission pid=24760] SAFE MODE: wrote beacon-only plan to data/decisions.csv
+[mission pid=24760] created child 24769 for report
+[mission pid=24760] child 24769 (report) finished, exit status = 0
+[mission pid=24760] ===== ground pass finished =====
+[mission pid=24824] ===== ground pass started =====
+[mission pid=24824] created child 24825 for telemetry acquisition
+[mission pid=24824] child 24825 (telemetry acquisition) finished, exit status = 0
+[mission pid=24824] created child 24826 for AI router
+[mission pid=24824] child 24826 (AI router) finished, exit status = 0
+[mission pid=24824] created child 24828 for report
+[mission pid=24824] child 24828 (report) finished, exit status = 0
+[mission pid=24824] ===== ground pass finished =====
+[mission pid=24915] ===== ground pass started =====
+[mission pid=24915] created child 24916 for telemetry acquisition
+[mission pid=24915] child 24916 (telemetry acquisition) finished, exit status = 0
+[mission pid=24915] created child 24917 for AI router
+[mission pid=24915] child 24917 (AI router) finished, exit status = 0
+[mission pid=24915] created child 24919 for report
+[mission pid=24915] child 24919 (report) finished, exit status = 0
+[mission pid=24915] ===== ground pass finished =====
+[mission pid=24974] ===== ground pass started =====
+[mission pid=24974] created child 24975 for telemetry acquisition
+[mission pid=24974] child 24975 (telemetry acquisition) finished, exit status = 1
+[mission pid=24974] created child 24976 for AI router
+[mission pid=24974] child 24976 (AI router) finished, exit status = 2
+[mission pid=24974] AI router could not read telemetry -> entering SAFE MODE
+[mission pid=24974] SAFE MODE: wrote beacon-only plan to data/decisions.csv
+[mission pid=24974] created child 24977 for report
+[mission pid=24974] child 24977 (report) finished, exit status = 0
+[mission pid=24974] ===== ground pass finished =====
+[mission pid=26199] ===== ground pass started =====
+[mission pid=26199] created child 26200 for telemetry acquisition
+[mission pid=26199] child 26200 (telemetry acquisition) finished, exit status = 0
+[mission pid=26199] created child 26201 for AI router
+[mission pid=26199] child 26201 (AI router) finished, exit status = 0
+[mission pid=26199] created child 26203 for report
+[mission pid=26199] child 26203 (report) finished, exit status = 0
+[mission pid=26199] ===== ground pass finished =====
+[mission pid=26240] ===== ground pass started =====
+[mission pid=26240] created child 26241 for telemetry acquisition
+[mission pid=26240] child 26241 (telemetry acquisition) finished, exit status = 0
+[mission pid=26240] created child 26242 for AI router
+[mission pid=26240] child 26242 (AI router) finished, exit status = 0
+[mission pid=26240] created child 26244 for report
+[mission pid=26240] child 26244 (report) finished, exit status = 0
+[mission pid=26240] ===== ground pass finished =====
+[mission pid=26279] ===== ground pass started =====
+[mission pid=26279] created child 26280 for telemetry acquisition
+[mission pid=26279] child 26280 (telemetry acquisition) finished, exit status = 1
+[mission pid=26279] created child 26281 for AI router
+[mission pid=26279] child 26281 (AI router) finished, exit status = 2
+[mission pid=26279] AI router could not read telemetry -> entering SAFE MODE
+[mission pid=26279] SAFE MODE: wrote beacon-only plan to data/decisions.csv
+[mission pid=26279] created child 26282 for report
+[mission pid=26279] child 26282 (report) finished, exit status = 0
+[mission pid=26279] ===== ground pass finished =====

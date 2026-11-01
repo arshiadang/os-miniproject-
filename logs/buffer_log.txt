@@ -1,0 +1,12 @@
+TX frame 000 from camera
+TX frame 001 from battery
+TX frame 002 from temperature
+TX frame 003 from camera
+TX frame 004 from battery
+TX frame 005 from temperature
+TX frame 006 from camera
+TX frame 007 from battery
+TX frame 008 from temperature
+TX frame 009 from camera
+TX frame 007 from battery
+TX frame 008 from temperature

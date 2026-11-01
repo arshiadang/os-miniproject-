@@ -1,0 +1,9 @@
+# messages waiting for the radio (written by the website)
+# id name arrival burst
+M1 Health_data 0 2
+M2 Photo_1 1 36
+M3 Voice 3 12
+M4 Photo_2 10 36
+M5 Health_data_2 30 2
+M6 Empty_message 2 0
+M7 Empty_message 2 0

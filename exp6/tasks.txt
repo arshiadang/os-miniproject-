@@ -1,0 +1,12 @@
+# SomaiyaSat ground pass - downlink jobs waiting for the radio
+# burst = radio airtime in seconds
+#   SSTV image (Robot36 mode) = 36 s, fixed by the SSTV mode
+#   others are estimates for this prototype
+# id  name                arrival  burst
+T1   TTC_beacon            0        2
+T2   Housekeeping_dump     0        6
+T3   SSTV_image_1          1        36
+T4   Codec2_voice          3        12
+T5   M17_data_packet       4        4
+T6   SSTV_image_2          10       36
+T7   TTC_beacon_late       30       2

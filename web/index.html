@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SomaiyaSat Mission Simulator</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f4f6fb; --card: #ffffff; --line: #dfe4ee; --text: #1c2333; --muted: #5d6b85;
+    --blue: #2563eb; --blue-soft: #e8efff;
+    --health: #2563eb; --photo: #9333ea; --voice: #16a34a; --beacon: #d97706; --wait: #94a3b8;
+    --ok: #15803d; --ok-soft: #e7f6ec; --bad: #dc2626; --bad-soft: #fdecec; --warn: #b45309; --warn-soft: #fff4e0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: #0f1b3d; color: #fff; padding: 26px 20px 22px; text-align: center; }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header p { margin: 0 auto; max-width: 720px; color: #c8d3ee; }
+  .how { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .how span { background: rgba(255,255,255,.1); border-radius: 999px; padding: 5px 14px; font-size: 14px; }
+  main { max-width: 900px; margin: 0 auto; padding: 18px 16px 70px; }
+  .map { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 4px 0 18px; }
+  .map a { text-decoration: none; color: var(--muted); background: var(--card); border: 1px solid var(--line);
+           border-radius: 999px; padding: 6px 14px; font-size: 14px; }
+  .map a.done { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
+  .playall { text-align: center; margin-bottom: 20px; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin-bottom: 22px; scroll-margin-top: 12px; }
+  .step-head { display: flex; gap: 14px; align-items: center; margin-bottom: 8px; }
+  .num { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color: #fff;
+         font-weight: 800; font-size: 19px; display: grid; place-items: center; }
+  h2 { margin: 0; font-size: 21px; }
+  .exp { color: var(--muted); font-size: 14px; }
+  .story { margin: 8px 0 14px; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 12px 0; }
+  .box h3 { margin: 0 0 10px; font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 12px; cursor: pointer;
+          font: inherit; font-size: 14px; text-align: left; color: var(--text); }
+  .chip b { display: block; font-size: 14.5px; }
+  .chip small { color: var(--muted); }
+  .chip.err { border-color: #f3b4b4; }
+  .chip.err b { color: var(--bad); }
+  .chip.on { border-color: var(--blue); background: var(--blue-soft); }
+  .inputs { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+  label { font-size: 15px; }
+  input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--text); }
+  input[type=number] { width: 80px; }
+  .run { font: inherit; font-weight: 700; font-size: 17px; background: var(--blue); color: #fff; border: 0;
+         border-radius: 10px; padding: 11px 22px; cursor: pointer; }
+  .run:disabled { opacity: .55; cursor: wait; }
+  .small-btn { font: inherit; font-size: 14px; border: 1px solid var(--blue); color: var(--blue); background: #fff;
+               border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  ol.events { margin: 0; padding: 0; list-style: none; counter-reset: e; }
+  ol.events li { counter-increment: e; position: relative; padding: 8px 10px 8px 44px; border-radius: 8px; margin-bottom: 6px;
+                 background: #f7f9fd; animation: pop .35s ease; }
+  ol.events li::before { content: counter(e); position: absolute; left: 10px; top: 8px; width: 24px; height: 24px; border-radius: 50%;
+                         background: var(--blue); color: #fff; font-size: 13px; font-weight: 700; display: grid; place-items: center; }
+  ol.events li.ok { background: var(--ok-soft); } ol.events li.ok::before { background: var(--ok); }
+  ol.events li.bad { background: var(--bad-soft); } ol.events li.bad::before { background: var(--bad); }
+  ol.events li.warn { background: var(--warn-soft); } ol.events li.warn::before { background: var(--warn); }
+  .tag { display: inline-block; font: 12px ui-monospace, Menlo, Consolas, monospace; background: #0f1b3d; color: #fff;
+         border-radius: 5px; padding: 1px 6px; margin-left: 8px; vertical-align: 1px; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .empty { color: var(--muted); font-style: italic; }
+  .verdict { border-radius: 12px; padding: 14px 16px; font-size: 17px; margin-top: 4px; }
+  .verdict.ok { background: var(--ok-soft); color: var(--ok); }
+  .verdict.bad { background: var(--bad-soft); color: var(--bad); }
+  .verdict.warn { background: var(--warn-soft); color: var(--warn); }
+  .verdict b { font-size: 20px; }
+  .timeline { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+  .timeline div { flex: 1; border-right: 1px solid rgba(255,255,255,.6); }
+  .ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; margin: 8px 0; }
+  .legend i { display: inline-block; width: 13px; height: 13px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  td input { width: 100%; }
+  .gantt-row { margin: 10px 0 16px; }
+  .gantt-row .lbl { font-weight: 700; margin-bottom: 4px; }
+  .gantt-row .lbl span { font-weight: 400; color: var(--muted); }
+  .gantt { display: flex; height: 36px; border-radius: 8px; overflow: hidden; background: #eef1f7; }
+  .gantt div { color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+               white-space: nowrap; overflow: hidden; border-right: 1px solid rgba(255,255,255,.7); animation: grow .3s ease; }
+  @keyframes grow { from { opacity: 0; } to { opacity: 1; } }
+  .picture { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 6px 0 4px; font-size: 14px; }
+  .pic { border: 2px solid var(--line); border-radius: 10px; padding: 8px 12px; text-align: center; background: #fff; }
+  .slots { display: flex; gap: 4px; justify-content: center; margin-top: 4px; }
+  .slots span { width: 22px; height: 22px; border: 2px solid var(--blue); border-radius: 4px; }
+  .arrow { color: var(--muted); font-size: 20px; }
+  .big3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 6px 0 12px; }
+  .big3 div { background: #f7f9fd; border-radius: 10px; padding: 10px 12px; }
+  .big3 b { display: block; font-size: 26px; }
+  .big3 small { color: var(--muted); }
+  .concept { background: #0f1b3d; color: #dbe5ff; border-radius: 12px; padding: 12px 16px; font-size: 14.5px; margin-top: 12px; }
+  .concept b { color: #fff; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+  pre { background: #0b1220; color: #d6e4ff; border-radius: 10px; padding: 12px; overflow: auto; max-height: 300px;
+        font: 12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛰️ SomaiyaSat Mission Simulator</h1>
+  <p>See what happens inside a tiny satellite during one 10-minute pass over our ground station.
+     There are 4 steps, and each step uses one Operating Systems experiment.</p>
+  <div class="how"><span>① Pick a situation (or click a suggestion)</span><span>② Press the blue button</span><span>③ Watch what happens, step by step</span></div>
+</header>
+
+<main>
+  <nav class="map">
+    <a href="#s1" id="m1">1 · Satellite flies over (Exp 4)</a>
+    <a href="#s2" id="m2">2 · One radio, many messages (Exp 6)</a>
+    <a href="#s3" id="m3">3 · Sensors share memory (Exp 7)</a>
+    <a href="#s4" id="m4">4 · Sharing power safely (Exp 9)</a>
+  </nav>
+  <div class="playall"><button class="small-btn" id="playAll" onclick="playAll()">▶ Play all 4 steps with normal inputs</button></div>
+
+  <!-- ===================== STEP 1 ===================== -->
+  <section class="step" id="s1">
+    <div class="step-head"><div class="num">1</div>
+      <div><h2>The satellite flies over the ground station</h2><div class="exp">Exp 4 · Processes and system calls, plus the AI</div></div></div>
+    <p class="story">For 10 minutes the satellite can talk to us. Its main program does not do everything itself.
+      It starts <b>3 helper programs</b> (child processes) one after another:
+      ① read the sensors, ② ask the <b>AI</b> what to send, ③ write a report.
+      The main program waits for each helper and checks whether it worked.</p>
+
+    <div class="box"><h3>Choose the situation</h3>
+      <div class="chips" id="c1">
+        <button class="chip on" onclick="pick1(this,85,false)"><b>Normal day</b><small>battery 85%, sensors OK</small></button>
+        <button class="chip" onclick="pick1(this,40,false)"><b>Half battery</b><small>40%, photos need 50%</small></button>
+        <button class="chip err" onclick="pick1(this,15,false)"><b>Low battery ⚠</b><small>15%, safety rule kicks in</small></button>
+        <button class="chip err" onclick="pick1(this,85,true)"><b>Broken sensor ⚠</b><small>no readings at all</small></button>
+        <button class="chip err" onclick="pick1(this,150,false)"><b>Wrong reading ⚠</b><small>battery 150% (impossible)</small></button>
+      </div>
+      <div class="inputs">
+        <label>Battery at start (%) <input type="number" id="bat" value="85"></label>
+        <label><input type="checkbox" id="broken"> Sensor is broken</label>
+      </div>
+    </div>
+    <button class="run" id="r1" onclick="step1()">▶ Start the pass</button>
+
+    <div class="box"><h3>What happens, step by step</h3><ol class="events" id="e1"><li class="empty" style="background:none;padding-left:0">Press "Start the pass" to see the steps here.</li></ol></div>
+    <div class="box" id="res1" style="display:none"><h3>What the AI decided during the 10 minutes</h3>
+      <div class="timeline" id="tl"></div>
+      <div class="ticks"><span>0 min</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10 min</span></div>
+      <div class="legend">
+        <span><i style="background:var(--health)"></i>Send health data</span><span><i style="background:var(--photo)"></i>Send photo</span>
+        <span><i style="background:var(--voice)"></i>Send voice</span><span><i style="background:var(--beacon)"></i>Battery saver beacon</span>
+        <span><i style="background:var(--wait)"></i>Wait (signal too weak)</span></div>
+      <div class="muted" style="font-size:14px;color:var(--muted)">Each box = 10 seconds. Hover over a box to see why the AI chose it.</div>
+      <div class="verdict" id="v1"></div>
+    </div>
+    <div class="concept"><b>OS idea used:</b> <code>fork()</code> makes a child process, <code>exec()</code> runs another program inside it,
+      <code>waitpid()</code> waits for it and reads its exit code (0 = OK). The report is written with <code>open()</code>, <code>read()</code>, <code>write()</code>, <code>close()</code>.
+      <br><b>AI used:</b> a decision tree trained on 5000 example situations. A safety rule always wins: battery below 20% → only a beacon.</div>
+    <details><summary>Show the real Linux output</summary><pre id="o1"></pre></details>
+  </section>
+
+  <!-- ===================== STEP 2 ===================== -->
+  <section class="step" id="s2">
+    <div class="step-head"><div class="num">2</div>
+      <div><h2>One radio, many messages: who goes first?</h2><div class="exp">Exp 6 · CPU scheduling: SJF and Round Robin</div></div></div>
+    <p class="story">The AI picked messages to send, but the satellite has <b>only one radio</b>, so messages must wait in a line.
+      We compare two rules:
+      <b>Shortest first</b> (SJF: the quickest message always goes next) and
+      <b>Take turns</b> (Round Robin: every message sends for a few seconds, then lets the next one go).</p>
+
+    <div class="box"><h3>Messages waiting for the radio</h3>
+      <div class="chips" style="margin-bottom:10px">
+        <button class="chip" onclick="aiJobs()"><b>Messages the AI chose</b><small>from Step 1</small></button>
+        <button class="chip" onclick="exampleJobs()"><b>Example messages</b><small>health, photos, voice</small></button>
+        <button class="chip err" onclick="badJob()"><b>Add a 0-second message ⚠</b><small>impossible message</small></button>
+      </div>
+      <table id="jobs"></table>
+      <button class="small-btn" style="margin-top:8px" onclick="addJob()">+ Add a message</button>
+      <div class="inputs">
+        <label>Each turn lasts <input type="number" id="slice" value="4"> seconds</label>
+        <div class="chips">
+          <button class="chip" onclick="setSlice(4)"><b>4 s</b></button>
+          <button class="chip" onclick="setSlice(8)"><b>8 s</b></button>
+          <button class="chip" onclick="setSlice(16)"><b>16 s</b></button>
+          <button class="chip err" onclick="setSlice(0)"><b>0 s ⚠</b><small>no turn at all</small></button>
+        </div>
+      </div>
+    </div>
+    <button class="run" id="r2" onclick="step2()">▶ Send the messages</button>
+
+    <div class="box"><h3>What happens, step by step</h3><ol class="events" id="e2"><li class="empty" style="background:none;padding-left:0">Press "Send the messages" to see the steps here.</li></ol>
+      <div id="g2"></div>
+      <div class="legend" id="lg2" style="display:none"><span><i style="background:var(--health)"></i>Health data</span><span><i style="background:var(--photo)"></i>Photo</span>
+        <span><i style="background:var(--voice)"></i>Voice</span><span><i style="background:var(--beacon)"></i>Beacon</span>
+        <span style="color:var(--muted)">· hover a block to see which message it is</span></div>
+      <div class="verdict" id="v2" style="display:none"></div>
+    </div>
+    <div class="concept"><b>OS idea used:</b> the radio is like the CPU and each message is a process.
+      <b>Burst time</b> = seconds the message needs. <b>Waiting time</b> = time spent in the line.
+      SJF gives the lowest average waiting time. Round Robin is fairer: nobody waits behind a long photo for too long.</div>
+    <details><summary>Show the real Linux output</summary><pre id="o2"></pre></details>
+  </section>
+
+  <!-- ===================== STEP 3 ===================== -->
+  <section class="step" id="s3">
+    <div class="step-head"><div class="num">3</div>
+      <div><h2>Three sensors share one memory box</h2><div class="exp">Exp 7 · Producer–consumer with semaphores and mutex</div></div></div>
+    <p class="story">The battery, temperature and camera sensors each make 4 readings and put them into a shared box with
+      3 slots. The radio takes readings out and sends them. Every reading gets a number, and each number must be sent <b>exactly once</b>.</p>
+    <div class="picture">
+      <div class="pic">🔋 Battery<br>🌡️ Temperature<br>📷 Camera<br><small>3 producer threads</small></div>
+      <div class="arrow">→</div>
+      <div class="pic">Shared box<div class="slots"><span></span><span></span><span></span></div><small>3 slots</small></div>
+      <div class="arrow">→</div>
+      <div class="pic">📡 Radio<br><small>1 consumer thread</small></div>
+    </div>
+
+    <div class="box"><h3>Choose how the sensors behave</h3>
+      <div class="chips">
+        <button class="chip on" id="lockOn" onclick="pick3(true)"><b>Use the lock ✔</b><small>one sensor writes at a time</small></button>
+        <button class="chip err" id="lockOff" onclick="pick3(false)"><b>Remove the lock ⚠</b><small>sensors write at the same time</small></button>
+      </div>
+    </div>
+    <button class="run" id="r3" onclick="step3()">▶ Start the 3 sensors</button>
+
+    <div class="box"><h3>What happens, step by step</h3><ol class="events" id="e3"><li class="empty" style="background:none;padding-left:0">Press "Start the 3 sensors" to see the steps here.</li></ol>
+      <div class="big3" id="b3" style="display:none"></div>
+      <div class="verdict" id="v3" style="display:none"></div>
+    </div>
+    <div class="concept"><b>OS idea used:</b> the <b>mutex</b> (lock) lets only one thread change the box at a time.
+      <b>Semaphores</b> count free and filled slots, so sensors wait when the box is full and the radio waits when it is empty.
+      Without the lock, the demo starts all sensors together so two can grab the same number at the same moment. That is a <b>race condition</b>.</div>
+    <details><summary>Show the real Linux output</summary><pre id="o3"></pre></details>
+  </section>
+
+  <!-- ===================== STEP 4 ===================== -->
+  <section class="step" id="s4">
+    <div class="step-head"><div class="num">4</div>
+      <div><h2>Sharing power without getting stuck</h2><div class="exp">Exp 9 · Deadlock avoidance with the Banker's algorithm</div></div></div>
+    <p class="story">Four tasks share the satellite's things: <b>1 radio, 1 camera, 8 units of power</b> (100 mW each) and <b>6 memory blocks</b>.
+      If we give away too much, tasks can end up waiting for each other forever. That is a <b>deadlock</b>.
+      So before saying YES to a request, the satellite checks: <i>"Can every task still finish?"</i></p>
+
+    <div class="box"><h3>Right now</h3><div id="state4" class="empty">loading…</div></div>
+
+    <div class="box"><h3>Make a request</h3>
+      <div class="chips" style="margin-bottom:10px">
+        <button class="chip" onclick="pick4(3,0,0,1,1)"><b>AI brain asks 1 power + 1 memory</b><small>small request</small></button>
+        <button class="chip err" onclick="pick4(1,0,0,3,2)"><b>Photo task asks 3 power + 2 memory ⚠</b><small>at night, takes everything</small></button>
+        <button class="chip err" onclick="pick4(0,1,0,0,0)"><b>Health task asks for the radio ⚠</b><small>radio is busy</small></button>
+        <button class="chip err" onclick="pick4(1,0,0,4,0)"><b>Photo task asks 4 power ⚠</b><small>more than it said it needs</small></button>
+      </div>
+      <div class="inputs">
+        <label>Who asks? <select id="who">
+          <option value="0">Health-data task</option><option value="1">Photo task</option>
+          <option value="2">Voice task</option><option value="3" selected>AI-brain task</option></select></label>
+        <label>radio <input type="number" id="q0" value="0" min="0"></label>
+        <label>camera <input type="number" id="q1" value="0" min="0"></label>
+        <label>power <input type="number" id="q2" value="1" min="0"></label>
+        <label>memory <input type="number" id="q3" value="1" min="0"></label>
+      </div>
+    </div>
+    <button class="run" id="r4" onclick="step4()">▶ Ask for it</button>
+
+    <div class="box"><h3>What happens, step by step</h3><ol class="events" id="e4"><li class="empty" style="background:none;padding-left:0">Press "Ask for it" to see the safety check here.</li></ol>
+      <div class="verdict" id="v4" style="display:none"></div>
+    </div>
+    <div class="concept"><b>OS idea used:</b> the <b>Banker's algorithm</b>, which is like a bank that only lends money if it can still pay everyone back.
+      It pretends to say YES, then checks if the tasks can finish one by one (the <b>safe sequence</b>).
+      If no order works, the answer is NO, because the request could cause a deadlock.</div>
+    <details><summary>Show the real Linux output</summary><pre id="o4"></pre></details>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const COLOR = { TX_TTC: "var(--health)", TX_SSTV: "var(--photo)", TX_VOICE: "var(--voice)", SAFE_BEACON: "var(--beacon)", IDLE: "var(--wait)" };
+const MSG_COLOR = n => /photo/i.test(n) ? "var(--photo)" : /voice/i.test(n) ? "var(--voice)" : /beacon/i.test(n) ? "var(--beacon)" : "var(--health)";
+
+async function post(path, body) {
+  const r = await fetch(path, { method: body === undefined ? "GET" : "POST",
+    headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+  return r.json();
+}
+// show events one by one so the order is easy to follow
+async function showEvents(listId, events, delay = 550) {
+  const ol = $(listId); ol.innerHTML = "";
+  for (const e of events) {
+    const li = document.createElement("li");
+    li.className = e.kind || "";
+    li.innerHTML = esc(e.text) + (e.tag ? `<span class="tag">${esc(e.tag)}</span>` : "");
+    ol.appendChild(li);
+    await sleep(delay);
+  }
+}
+function busy(btnId, on) { $(btnId).disabled = on; }
+function markDone(n) { $("m" + n).classList.add("done"); }
+function selectChip(container, el) { container.querySelectorAll(".chip").forEach(c => c.classList.remove("on")); if (el) el.classList.add("on"); }
+
+// ===================== STEP 1 =====================
+function pick1(el, bat, broken) { selectChip($("c1"), el); $("bat").value = bat; $("broken").checked = broken; }
+
+async function step1() {
+  busy("r1", true);
+  $("res1").style.display = "none";
+  $("e1").innerHTML = '<li>Running on Linux…</li>';
+  const r = await post("/api/pass", { battery: $("bat").value, broken: $("broken").checked });
+  $("o1").textContent = "$ " + r.command + "\n\n" + r.output;
+  await showEvents("e1", r.events);
+
+  const tl = $("tl"); tl.innerHTML = "";
+  if (!r.safe_mode) {
+    r.decisions.forEach(d => {
+      const box = document.createElement("div");
+      box.style.background = COLOR[d.action];
+      box.title = `At ${d.t} s: signal ${d.snr} dB, battery ${d.battery}% → ${d.words}${d.changed ? " (changed by safety rule)" : ""}`;
+      tl.appendChild(box);
+    });
+  } else {
+    tl.innerHTML = '<div style="background:var(--beacon)" title="Safe mode: beacon only"></div>';
+  }
+  const c = r.counts, v = $("v1");
+  if (r.safe_mode) {
+    v.className = "verdict bad";
+    v.innerHTML = `<b>Problem found → SAFE MODE.</b><br>The sensor step failed, so the AI had nothing to work with.
+      The main program noticed the failed child (exit code ≠ 0) and only sends "I am alive" beacons. The satellite stays safe.`;
+  } else if (c["Battery saver beacon"] === r.decisions.length) {
+    v.className = "verdict warn";
+    v.innerHTML = `<b>Battery too low → beacon only.</b><br>With so little battery, every moment was a battery saver beacon.
+      No photos or voice were sent, to protect the satellite.`;
+  } else {
+    v.className = "verdict ok";
+    v.innerHTML = `<b>Pass finished.</b> Out of ${r.decisions.length} moments the AI chose:
+      health data <b>${c["Send health data"]}</b>, photos <b>${c["Send photo"]}</b>, voice <b>${c["Send voice"]}</b>,
+      battery saver <b>${c["Battery saver beacon"]}</b>, and waited <b>${c["Wait (signal too weak)"]}</b> times (signal too weak at the start and end of the pass).`;
+  }
+  $("res1").style.display = "block";
+  markDone(1);
+  busy("r1", false);
+  return r;
+}
+
+// ===================== STEP 2 =====================
+let jobs = [];
+function drawJobs() {
+  $("jobs").innerHTML = `<tr><th>Message</th><th>Arrives at (s)</th><th>Needs (s)</th><th></th></tr>` +
+    jobs.map((j, i) => `<tr>
+      <td><input value="${esc(j.name)}" onchange="jobs[${i}].name=this.value"></td>
+      <td><input type="number" value="${j.arrival}" onchange="jobs[${i}].arrival=this.value"></td>
+      <td><input type="number" value="${j.burst}" onchange="jobs[${i}].burst=this.value"></td>
+      <td><button class="small-btn" onclick="jobs.splice(${i},1);drawJobs()">✕</button></td></tr>`).join("");
+}
+function exampleJobs() {
+  jobs = [{ name: "Health_data", arrival: 0, burst: 2 }, { name: "Photo_1", arrival: 1, burst: 36 },
+          { name: "Voice", arrival: 3, burst: 12 }, { name: "Photo_2", arrival: 10, burst: 36 },
+          { name: "Health_data_2", arrival: 30, burst: 2 }];
+  drawJobs();
+}
+async function aiJobs() {
+  const r = await post("/api/ai_jobs");
+  if (!r.ok) { alert(r.error); return false; }
+  jobs = r.jobs; drawJobs(); return true;
+}
+function badJob() { jobs.push({ name: "Empty_message", arrival: 2, burst: 0 }); drawJobs(); }
+function addJob() { jobs.push({ name: "New_message", arrival: 0, burst: 5 }); drawJobs(); }
+function setSlice(s) { $("slice").value = s; }
+
+async function drawGantt(container, title, subtitle, p, names) {
+  const end = p.gantt.length ? p.gantt[p.gantt.length - 1].end : 1;
+  const row = document.createElement("div");
+  row.className = "gantt-row";
+  row.innerHTML = `<div class="lbl">${title} <span>${subtitle}</span></div><div class="gantt"></div>
+    <div class="ticks"><span>0 s</span><span>${end} s</span></div>`;
+  container.appendChild(row);
+  const bar = row.querySelector(".gantt");
+  for (const g of p.gantt) {
+    const d = document.createElement("div");
+    const name = names[g.job] || g.job;
+    d.style.width = ((g.end - g.start) / end * 100) + "%";
+    d.style.background = MSG_COLOR(name);
+    d.title = `${name}: ${g.start}–${g.end} s`;
+    d.textContent = (g.end - g.start) / end > 0.06 ? name.replace(/_/g, " ") : "";
+    bar.appendChild(d);
+    await sleep(160);
+  }
+}
+
+async function step2() {
+  busy("r2", true);
+  if (!jobs.length) exampleJobs();
+  $("g2").innerHTML = ""; $("v2").style.display = "none"; $("lg2").style.display = "none";
+  const slice = $("slice").value;
+  const r = await post("/api/radio", { jobs, slice });
+  $("o2").textContent = "$ " + (r.command || "") + "\n\n" + (r.output || "");
+  if (!r.ok) {
+    await showEvents("e2", [{ text: `${jobs.length} messages are waiting for the radio`, kind: "info" },
+                            { text: r.error, kind: "bad" }]);
+    const v = $("v2"); v.style.display = "block"; v.className = "verdict bad";
+    v.innerHTML = "<b>Input error → nothing was sent.</b><br>The scheduler checks the input before starting, so bad values cannot break the radio. Fix the value and try again.";
+    busy("r2", false); return r;
+  }
+  const sjf = r.results[0], rr = r.results[1];
+  const names = {}; sjf.rows.forEach(x => names[x.id] = x.name);
+  await showEvents("e2", [
+    { text: `${jobs.length} messages are waiting for the radio`, kind: "info" },
+    { text: "Rule A, shortest first: the radio always picks the quickest message that has arrived", kind: "info", tag: "SJF" },
+    { text: `Rule B, take turns: each message sends for ${slice} s, then goes to the back of the line`, kind: "info", tag: "Round Robin" },
+  ], 450);
+  $("lg2").style.display = "flex";
+  await drawGantt($("g2"), "Rule A · Shortest first", `average wait ${sjf.avg_wait.toFixed(1)} s`, sjf, names);
+  await drawGantt($("g2"), `Rule B · Take turns (${slice} s)`, `average wait ${rr.avg_wait.toFixed(1)} s`, rr, names);
+
+  const worst = p => p.rows.reduce((a, b) => (b.wait > a.wait ? b : a));
+  const wA = worst(sjf), wB = worst(rr);
+  const better = sjf.avg_wait <= rr.avg_wait ? "Shortest first" : "Take turns";
+  const v = $("v2"); v.style.display = "block"; v.className = "verdict ok";
+  v.innerHTML = `<b>${better} gives less waiting on average</b> (${sjf.avg_wait.toFixed(1)} s vs ${rr.avg_wait.toFixed(1)} s).<br>
+    Longest wait with shortest first: <b>${esc(wA.name.replace(/_/g, " "))}</b> waited ${wA.wait} s.
+    With take turns: <b>${esc(wB.name.replace(/_/g, " "))}</b> waited ${wB.wait} s.<br>
+    <small>Try a different turn length (4, 8, 16 s) and see how the waiting changes.</small>`;
+  markDone(2);
+  busy("r2", false);
+  return r;
+}
+
+// ===================== STEP 3 =====================
+let useLock = true;
+function pick3(lock) { useLock = lock; $("lockOn").classList.toggle("on", lock); $("lockOff").classList.toggle("on", !lock); }
+
+async function step3() {
+  busy("r3", true);
+  $("b3").style.display = "none"; $("v3").style.display = "none";
+  const r = await post("/api/sensors", { lock: useLock });
+  $("o3").textContent = "$ " + r.command + "\n\n" + r.output;
+  const ev = [
+    { text: "3 sensor threads and 1 radio thread start at the same time", kind: "info", tag: "pthread_create()" },
+    { text: useLock ? "Lock is ON: a sensor must take the lock before touching the box" : "Lock is OFF: sensors touch the box whenever they like",
+      kind: useLock ? "ok" : "warn", tag: useLock ? "mutex" : "no mutex" },
+    { text: "When the box is full, sensors wait. When it is empty, the radio waits", kind: "info", tag: "semaphores" },
+    { text: "Radio sends: " + r.first.slice(0, 6).map(f => `#${f.frame} (${f.sensor})`).join(", ") + " …", kind: "info" },
+  ];
+  if (r.race) {
+    if (r.twice.length) ev.push({ text: `Reading number(s) ${r.twice.join(", ")} were sent TWICE: two sensors took the same number at the same time`, kind: "bad" });
+    if (r.lost_examples.length) ev.push({ text: `Reading number(s) ${r.lost_examples.join(", ")} were NEVER sent: lost`, kind: "bad" });
+  } else {
+    ev.push({ text: `All ${r.total} readings sent, each number exactly once`, kind: "ok" });
+  }
+  await showEvents("e3", ev);
+  $("b3").style.display = "grid";
+  $("b3").innerHTML = `<div><b>${r.made}</b><small>reading numbers given out (should be ${r.total})</small></div>
+    <div><b style="color:${r.duplicates ? "var(--bad)" : "var(--ok)"}">${r.duplicates}</b><small>sent twice</small></div>
+    <div><b style="color:${r.lost ? "var(--bad)" : "var(--ok)"}">${r.lost}</b><small>lost</small></div>`;
+  const v = $("v3"); v.style.display = "block";
+  if (r.race) {
+    v.className = "verdict bad";
+    v.innerHTML = "<b>Race condition!</b><br>Without the lock, two sensors sometimes worked on the box at the same moment. Some readings were sent twice and some were lost. Run it again: the numbers change every time, because it depends on timing.";
+  } else {
+    v.className = "verdict ok";
+    v.innerHTML = "<b>Everything correct.</b><br>With the lock and semaphores, every reading was sent exactly once. Now try <i>Remove the lock</i> to see what goes wrong.";
+  }
+  markDone(3);
+  busy("r3", false);
+  return r;
+}
+
+// ===================== STEP 4 =====================
+const RES = ["radio", "camera", "power", "memory"];
+function pick4(who, a, b, c, d) { $("who").value = who; [a, b, c, d].forEach((x, i) => $("q" + i).value = x); }
+function vec(v) { return v.map((x, i) => `${RES[i]} ${x}`).join(", "); }
+
+function drawState(r) {
+  if (!r.table || !r.table.length) return;
+  $("state4").className = "";
+  $("state4").innerHTML = `<table><tr><th>Task</th><th>Has now</th><th>May still need</th></tr>` +
+    r.table.map(t => `<tr><td>${t.task}</td><td>${vec(t.has)}</td><td>${vec(t.needs)}</td></tr>`).join("") +
+    `</table><div style="margin-top:8px">Free right now: <b>${vec(r.free)}</b></div>`;
+}
+
+async function step4() {
+  busy("r4", true);
+  $("v4").style.display = "none";
+  const body = { task: $("who").value };
+  RES.forEach((r, i) => body[r] = $("q" + i).value);
+  const r = await post("/api/power", body);
+  if (r.error) { alert(r.error); busy("r4", false); return r; }
+  $("o4").textContent = "$ " + r.command + "\n\n" + r.output;
+  drawState(r);
+  const who = $("who").options[$("who").selectedIndex].text;
+  const ask = RES.map((x, i) => `${x} ${$("q" + i).value}`).join(", ");
+  await showEvents("e4", [{ text: `${who} asks for: ${ask}`, kind: "info", tag: "request" }, ...r.steps], 600);
+  const v = $("v4"); v.style.display = "block";
+  const msg = {
+    GRANT: ["ok", "YES, request given.", "Even after giving it, there is an order in which every task can finish, so the system stays SAFE."],
+    DENY: ["bad", "NO, request refused.", "If we said yes, no task could finish and everyone would wait forever (deadlock). The task must wait until others give things back."],
+    WAIT: ["warn", "WAIT.", "There is not enough free right now. The task must wait until another task finishes and gives things back."],
+    ERROR: ["bad", "NOT ALLOWED.", "The task asked for more than the maximum it said it would ever need. That is an invalid request."],
+  }[r.verdict] || ["warn", "Unknown", ""];
+  v.className = "verdict " + msg[0];
+  v.innerHTML = `<b>${msg[1]}</b><br>${msg[2]}`;
+  markDone(4);
+  busy("r4", false);
+  return r;
+}
+
+// ===================== PLAY ALL =====================
+async function playAll() {
+  $("playAll").disabled = true;
+  try {
+    pick1($("c1").querySelector(".chip"), 85, false);
+    $("s1").scrollIntoView({ behavior: "smooth" }); await sleep(500); await step1(); await sleep(1200);
+    $("s2").scrollIntoView({ behavior: "smooth" }); await sleep(500); await aiJobs(); setSlice(4); await step2(); await sleep(1200);
+    $("s3").scrollIntoView({ behavior: "smooth" }); await sleep(500); pick3(true); await step3(); await sleep(1200);
+    $("s4").scrollIntoView({ behavior: "smooth" }); await sleep(500); pick4(3, 0, 0, 1, 1); await step4();
+  } catch (e) { alert("Something failed: " + e + "\nIs the server still running in Ubuntu?"); }
+  $("playAll").disabled = false;
+}
+
+// start: example messages + current resource table
+exampleJobs();
+post("/api/power", { task: 3, radio: 0, camera: 0, power: 0, memory: 0 }).then(drawState).catch(() => {});
+</script>
+</body>
+</html>

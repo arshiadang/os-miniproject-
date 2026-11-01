@@ -1,0 +1,3 @@
+# invalid input test: burst must be > 0
+T1 TTC_beacon 0 2
+T2 Broken_job 3 0
