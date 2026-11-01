@@ -3,6 +3,11 @@
 **Use case:** SomaiyaSat & SomaiyaPod – a PocketQube satellite with one radio that must decide what to transmit (telemetry, SSTV images, voice/data).
 **Experiments:** 4, 6, 7 and 9, all applied to that satellite.
 
+1. Experiment 4: Process Management and System Calls
+2. Experiment 6: CPU Scheduling Algorithms – Shortest Job First (SJF) and Round Robin (RR)
+3. Experiment 7: Process Synchronization – Producer–Consumer Problem Using Semaphores and Mutex
+4. Experiment 9: Deadlock Avoidance Using Banker's Algorithm
+
 | Exp | What it does in this project |
 |---|---|
 | **4** System calls | A parent process creates 3 child processes: get telemetry → AI decides what to send → write a report (`fork`, `exec`, `waitpid`, `open`, `read`, `write`, `close`) |
